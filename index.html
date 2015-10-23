@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+<b>Devicemotion events</b>
+
+<p>
+Delta time:
+<div id="delta"></div>
+</p>
+
+<p>
+devicemotionEvent.interval
+<div id="interval"></div>
+</p>
+
+</body>
+<script>
+var previousTimestamp;
+
+var deltaContainer = document.getElementById('delta');
+
+var intervalContainer = document.getElementById('interval');
+
+window.addEventListener('devicemotion', function(deviceMotion) {
+  var timestamp = deviceMotion.timeStamp / 1000;
+  var delta = timestamp - this.previousTimestamp;
+
+  deltaContainer.innerHTML = delta;
+  intervalContainer.innerHTML = deviceMotion.interval;
+
+  previousTimestamp = timestamp;
+});
+</script>
+</html>
+
