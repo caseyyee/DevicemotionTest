@@ -6,21 +6,31 @@
 <body>
 <b>Devicemotion events</b>
 
-<p>
+<br/><br/>
 Delta time:
 <div id="delta"></div>
-</p>
 
-<p>
+<br/><br/>
+Acceleration Including Gravity:
+<div id="accel"></div>
+
+<br/><br/>
+rotation rate:
+<div id="rotationRate"></div>
+
+
+<br/><br/>
 devicemotionEvent.interval
 <div id="interval"></div>
-</p>
 
 </body>
 <script>
 var previousTimestamp;
 
 var deltaContainer = document.getElementById('delta');
+
+var acceleration = document.getElementById('accel');
+var rotation = document.getElementById('rotationRate');
 
 var intervalContainer = document.getElementById('interval');
 
@@ -29,6 +39,17 @@ window.addEventListener('devicemotion', function(deviceMotion) {
   var delta = timestamp - this.previousTimestamp;
 
   deltaContainer.innerHTML = delta;
+
+  var accGravity = deviceMotion.accelerationIncludingGravity;
+  acceleration.innerHTML = accGravity.x + '<br/>'
+  						+ accGravity.y + '<br/>'
+  						+ accGravity.z + '<br/>';
+
+  var rotRate = deviceMotion.rotationRate;
+  rotation.innerHTML = rotRate.alpha + '<br/>'
+  						+ rotRate.beta + '<br/>'
+  						+ rotRate.gamma + '<br/>';
+
   intervalContainer.innerHTML = deviceMotion.interval;
 
   previousTimestamp = timestamp;
