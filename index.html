@@ -7,9 +7,13 @@
 <b>Devicemotion events</b>
 
 <br/><br/>
-Delta time:
+Timestamp:
 <div id="timestamp"></div>
+
+delta:
 <div id="delta"></div>
+
+delta averaged:
 <div id="delta-average"></div>
 
 <br/><br/>
@@ -33,14 +37,17 @@ var deltaEl = document.getElementById('delta');
 var deltaAverageEl = document.getElementById('delta-average');
 var acceleration = document.getElementById('accel');
 var rotation = document.getElementById('rotationRate');
-
 var intervalContainer = document.getElementById('interval');
+var isFirefoxAndroid = navigator.userAgent.indexOf('Firefox') !== -1 && navigator.userAgent.indexOf('Android') !== -1;
 
 var deltaArray = [];
 var deltaSampleSize = 100;
 
 window.addEventListener('devicemotion', function(deviceMotion) {
   var timestamp = deviceMotion.timeStamp;
+  if (isFirefoxAndroid) {
+    timestamp /= 1000;
+  }
   timestampEl.innerHTML = timestamp;
 
   var delta = timestamp - this.previousTimestamp;
