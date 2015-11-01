@@ -8,7 +8,9 @@
 
 <br/><br/>
 Delta time:
+<div id="timestamp"></div>
 <div id="delta"></div>
+<div id="delta-average"></div>
 
 <br/><br/>
 Acceleration Including Gravity:
@@ -26,19 +28,32 @@ devicemotionEvent.interval
 </body>
 <script>
 var previousTimestamp;
-
-var deltaContainer = document.getElementById('delta');
-
+var timestampEl = document.getElementById('timestamp');
+var deltaEl = document.getElementById('delta');
+var deltaAverageEl = document.getElementById('delta-average');
 var acceleration = document.getElementById('accel');
 var rotation = document.getElementById('rotationRate');
 
 var intervalContainer = document.getElementById('interval');
 
-window.addEventListener('devicemotion', function(deviceMotion) {
-  var timestamp = deviceMotion.timeStamp / 1000;
-  var delta = timestamp - this.previousTimestamp;
+var deltaArray = [];
+var deltaSampleSize = 100;
 
-  deltaContainer.innerHTML = delta;
+window.addEventListener('devicemotion', function(deviceMotion) {
+  var timestamp = deviceMotion.timeStamp;
+  timestampEl.innerHTML = timestamp;
+
+  var delta = timestamp - this.previousTimestamp;
+  deltaEl.innerHTML = delta;
+
+  deltaArray.push(delta)
+  if (deltaArray.length > deltaSampleSize) {
+    deltaArray.shift();
+  };
+
+  var deltaSum = deltaArray.reduce(function(a, b) { return a + b; });
+  var deltaAverage = deltaSum/deltaArray.length;
+  deltaAverageEl.innerHTML = deltaAverage;
 
   var accGravity = deviceMotion.accelerationIncludingGravity;
   acceleration.innerHTML = accGravity.x + '<br/>'
@@ -46,9 +61,9 @@ window.addEventListener('devicemotion', function(deviceMotion) {
   						+ accGravity.z + '<br/>';
 
   var rotRate = deviceMotion.rotationRate;
-  rotation.innerHTML = rotRate.alpha + '<br/>'
-  						+ rotRate.beta + '<br/>'
-  						+ rotRate.gamma + '<br/>';
+  rotation.innerHTML = rotRate.alpha/100 + '<br/>'
+  						+ rotRate.beta/100 + '<br/>'
+  						+ rotRate.gamma/100 + '<br/>';
 
   intervalContainer.innerHTML = deviceMotion.interval;
 
