@@ -7,7 +7,14 @@
 <b>Devicemotion events</b>
 
 <br/><br/>
-Timestamp:
+Performance.now()
+<div id="performance"></div>
+
+delta:
+<div id="performance-delta"></div>
+
+<br/><br/>
+DeviceMotionEvent.timestamp
 <div id="timestamp"></div>
 
 delta:
@@ -17,21 +24,23 @@ delta averaged:
 <div id="delta-average"></div>
 
 <br/><br/>
-Acceleration Including Gravity:
+DeviceMotionEvent.accelerationIncludingGravity
 <div id="accel"></div>
 
 <br/><br/>
-rotation rate:
+DeviceMotionEvent.rotationRate
 <div id="rotationRate"></div>
 
-
 <br/><br/>
-devicemotionEvent.interval
+DeviceMotionEvent.interval
 <div id="interval"></div>
 
 </body>
 <script>
+var previousPerformance;
 var previousTimestamp;
+var performanceEl = document.getElementById('performance');
+var performanceDeltaEl = document.getElementById('performance-delta');
 var timestampEl = document.getElementById('timestamp');
 var deltaEl = document.getElementById('delta');
 var deltaAverageEl = document.getElementById('delta-average');
@@ -44,13 +53,22 @@ var deltaArray = [];
 var deltaSampleSize = 100;
 
 window.addEventListener('devicemotion', function(deviceMotion) {
+  // performance.now()
+  var perf = performance.now();
+  var perfDelta = perf - previousPerformance;
+  previousPerformance = perf;
+  performanceEl.innerHTML = perf;
+  performanceDeltaEl.innerHTML = perfDelta;
+
+  // devicemotion timestamp
   var timestamp = deviceMotion.timeStamp;
   if (isFirefoxAndroid) {
     timestamp /= 1000;
   }
   timestampEl.innerHTML = timestamp;
 
-  var delta = timestamp - this.previousTimestamp;
+  var delta = timestamp - previousTimestamp;
+  previousTimestamp = timestamp;
   deltaEl.innerHTML = delta;
 
   deltaArray.push(delta)
@@ -62,6 +80,7 @@ window.addEventListener('devicemotion', function(deviceMotion) {
   var deltaAverage = deltaSum/deltaArray.length;
   deltaAverageEl.innerHTML = deltaAverage;
 
+  // devicemotion properties.
   var accGravity = deviceMotion.accelerationIncludingGravity;
   acceleration.innerHTML = accGravity.x + '<br/>'
   						+ accGravity.y + '<br/>'
@@ -73,8 +92,6 @@ window.addEventListener('devicemotion', function(deviceMotion) {
   						+ rotRate.gamma/100 + '<br/>';
 
   intervalContainer.innerHTML = deviceMotion.interval;
-
-  previousTimestamp = timestamp;
 });
 </script>
 </html>
