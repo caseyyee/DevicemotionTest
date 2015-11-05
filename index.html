@@ -1,29 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
   <title></title>
+  <style>
+  #stat {
+    width: 500px;
+    height: 100px;
+  }
+  </style>
 </head>
 <body>
 <b>Devicemotion events</b>
-
 <br/><br/>
-Performance.now()
-<div id="performance"></div>
 
-delta:
-<div id="performance-delta"></div>
+<canvas id="stat" width="500" height="100"></canvas>
 
-<br/><br/>
+<!-- <br/><br/>
 DeviceMotionEvent.timestamp
 <div id="timestamp"></div>
 
 delta:
-<div id="delta"></div>
+<div id="delta"></div> -->
 
+<br/>
 delta averaged:
 <div id="delta-average"></div>
 
-<br/><br/>
+<br/>
+delta min:
+<div id="delta-min"></div>
+
+<br/>
+delta max:
+<div id="delta-max"></div>
+
+<!-- <br/><br/>
 DeviceMotionEvent.accelerationIncludingGravity
 <div id="accel"></div>
 
@@ -33,7 +46,7 @@ DeviceMotionEvent.rotationRate
 
 <br/><br/>
 DeviceMotionEvent.interval
-<div id="interval"></div>
+<div id="interval"></div> -->
 
 </body>
 <script>
@@ -44,54 +57,85 @@ var performanceDeltaEl = document.getElementById('performance-delta');
 var timestampEl = document.getElementById('timestamp');
 var deltaEl = document.getElementById('delta');
 var deltaAverageEl = document.getElementById('delta-average');
+var deltaMinEl = document.getElementById('delta-min');
+var deltaMaxEl = document.getElementById('delta-max');
 var acceleration = document.getElementById('accel');
 var rotation = document.getElementById('rotationRate');
 var intervalContainer = document.getElementById('interval');
 var isFirefoxAndroid = navigator.userAgent.indexOf('Firefox') !== -1 && navigator.userAgent.indexOf('Android') !== -1;
 
 var deltaArray = [];
-var deltaSampleSize = 100;
+var deltaSampleSize = 50;
+
+// Quick canvas stats
+var canvas = document.getElementById('stat');
+var ctx = canvas.getContext('2d');
+var statWidth = canvas.width;
+var statHeight = canvas.height;
+var statIndex = 0;
+
+function setupStat() {
+  ctx.fillStyle = 'rgb(0,0,55)';
+  ctx.fillRect(0, 0, statWidth, statHeight);
+}
+
+function plotStat(value) {
+  ctx.clearRect(statIndex,statHeight,1,statHeight);
+  ctx.fillStyle = 'rgb(255,0,0)';
+  ctx.fillRect(statIndex,statHeight-value,1,value);
+  statIndex++;
+  if (statIndex > statWidth) statIndex = 0;
+}
+
+setupStat();
+
+
+// Device motion events
+var deltaArray;
+
+setInterval(function() {
+  var deltaSum = deltaArray.reduce(function(a, b) { return a + b; });
+  var deltaAverage = deltaSum/deltaArray.length;
+  deltaAverageEl.innerHTML = deltaAverage;
+
+  var max = Math.max.apply(Math, deltaArray);
+  var min = Math.min.apply(Math, deltaArray);
+  deltaMinEl.innerHTML = min;
+  deltaMaxEl.innerHTML = max;
+
+}, 1000);
 
 window.addEventListener('devicemotion', function(deviceMotion) {
-  // performance.now()
-  var perf = performance.now();
-  var perfDelta = perf - previousPerformance;
-  previousPerformance = perf;
-  performanceEl.innerHTML = perf;
-  performanceDeltaEl.innerHTML = perfDelta;
-
   // devicemotion timestamp
   var timestamp = deviceMotion.timeStamp;
   if (isFirefoxAndroid) {
     timestamp /= 1000;
   }
-  timestampEl.innerHTML = timestamp;
+  // timestampEl.innerHTML = timestamp;
 
   var delta = timestamp - previousTimestamp;
+  plotStat(delta*2); // *2 just so we look at it a little closer.
+
   previousTimestamp = timestamp;
-  deltaEl.innerHTML = delta;
+  // deltaEl.innerHTML = delta;
 
   deltaArray.push(delta)
   if (deltaArray.length > deltaSampleSize) {
     deltaArray.shift();
   };
 
-  var deltaSum = deltaArray.reduce(function(a, b) { return a + b; });
-  var deltaAverage = deltaSum/deltaArray.length;
-  deltaAverageEl.innerHTML = deltaAverage;
-
   // devicemotion properties.
-  var accGravity = deviceMotion.accelerationIncludingGravity;
-  acceleration.innerHTML = accGravity.x + '<br/>'
-  						+ accGravity.y + '<br/>'
-  						+ accGravity.z + '<br/>';
+  // var accGravity = deviceMotion.accelerationIncludingGravity;
+  // acceleration.innerHTML = accGravity.x + '<br/>'
+  // 						+ accGravity.y + '<br/>'
+  // 						+ accGravity.z + '<br/>';
 
-  var rotRate = deviceMotion.rotationRate;
-  rotation.innerHTML = rotRate.alpha/100 + '<br/>'
-  						+ rotRate.beta/100 + '<br/>'
-  						+ rotRate.gamma/100 + '<br/>';
+  // var rotRate = deviceMotion.rotationRate;
+  // rotation.innerHTML = rotRate.alpha/100 + '<br/>'
+  // 						+ rotRate.beta/100 + '<br/>'
+  // 						+ rotRate.gamma/100 + '<br/>';
 
-  intervalContainer.innerHTML = deviceMotion.interval;
+  // intervalContainer.innerHTML = deviceMotion.interval;
 });
 </script>
 </html>
